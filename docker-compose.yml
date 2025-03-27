@@ -8,7 +8,7 @@ services:
     container_name: laravel_app
     working_dir: /var/www/html
     volumes:
-      - .:/var/www/html
+      - .:/var/www
     networks:
       - laravel_network
     depends_on:
@@ -20,7 +20,7 @@ services:
     ports:
       - "85:80"
     volumes:
-      - .:/var/www/html
+      - .:/var/www
       - ./Docker/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - app
