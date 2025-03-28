@@ -5,11 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Resource;
 use App\Models\Reservation;
-use Carbon\Carbon;
 use Exception;
+use App\Repositories\Interfaces\ReservationRepositoryInterface;
+use App\Repositories\Interfaces\ResourceRepositoryInterface;
+use App\Helpers\ResponseHelper;
 
 class ReservationController extends Controller
 {
+    protected $reservationRepository;
+    protected $resourceRepository;
+
+    public function __construct(ReservationRepositoryInterface $reservationRepository, ResourceRepositoryInterface $resourceRepository)
+    {
+        $this->reservationRepository = $reservationRepository;
+        $this->resourceRepository = $resourceRepository;
+    }
+    
     public function store(Request $request)
     {
         try {
@@ -18,50 +29,30 @@ class ReservationController extends Controller
                 'reserved_at' => 'required|date',
                 'duration' => 'required|integer|min:1'
             ]);
-    
-            $startTime = Carbon::parse($request->reserved_at);
-            $endTime = $startTime->copy()->addMinutes($request->duration);
-    
-            $conflict = Reservation::where('resource_id', $request->resource_id)
-                ->where(function ($query) use ($startTime, $endTime) {
-                    $query->whereBetween('reserved_at', [$startTime, $endTime])
-                          ->orWhereBetween('reserved_at', [$startTime, $endTime]);
-                })->exists();
+
+            $conflict = $this->resourceRepository->checkAvailability($request->resource_id, $request->reserved_at, $request->duration);
     
             if ($conflict) {
                 throw new Exception("Resource is already reserved in this time slot");
             }
     
-            $reservation = Reservation::create($request->all());
-            return response()->json([
-                "status" => 201,
-                "data" => $reservation
-            ], 201);
+            $reservation = $this->reservationRepository->create($request->all());
+            return ResponseHelper::success($reservation);
         } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "details" => $e->getMessage()
-            ], 500);
+            return ResponseHelper::error($e);
         }
-
-        
     }
 
     public function destroy($id)
     {
         try {
-            $reservation = Reservation::findOrFail($id);
-            $reservation->delete();
-            return response()->json([
-                "status" => 200,
-                "data" => "Reservation cancelled successful"
-            ]);
+            $reservation = $this->reservationRepository->delete($id);
+            if (!$reservation) {
+                throw new Exception("Reservation ID dont exist");
+            }
+            return ResponseHelper::success("Reservation cancelled successful");
         } catch (Exception $e) {
-            return response()->json([
-                "status" => 500,
-                "details" => $e->getMessage()
-            ], 500);
+            return ResponseHelper::error($e);
         }
-
     }
 }
