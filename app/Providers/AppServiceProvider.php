@@ -17,6 +17,12 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(ResourceRepositoryInterface::class, ResourceRepository::class);
         $this->app->bind(ReservationRepositoryInterface::class, ReservationRepository::class);
+        $this->app->singleton(ReservationFactory::class, function ($app) {
+            return new ReservationFactory(
+                $app->make(ResourceRepositoryInterface::class),
+                $app->make(ReservationRepositoryInterface::class)
+            );
+        });
     }
 
     /**

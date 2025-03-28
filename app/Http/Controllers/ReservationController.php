@@ -7,7 +7,7 @@ use App\Models\Resource;
 use App\Models\Reservation;
 use Exception;
 use App\Repositories\Interfaces\ReservationRepositoryInterface;
-use App\Repositories\Interfaces\ResourceRepositoryInterface;
+use App\Factories\ReservationFactory;
 use App\Helpers\ResponseHelper;
 
 class ReservationController extends Controller
@@ -15,10 +15,13 @@ class ReservationController extends Controller
     protected $reservationRepository;
     protected $resourceRepository;
 
-    public function __construct(ReservationRepositoryInterface $reservationRepository, ResourceRepositoryInterface $resourceRepository)
+    public function __construct(
+        ReservationRepositoryInterface $reservationRepository,
+        ReservationFactory $reservationFactory
+    )
     {
         $this->reservationRepository = $reservationRepository;
-        $this->resourceRepository = $resourceRepository;
+        $this->reservationFactory = $reservationFactory;
     }
     
     public function store(Request $request)
@@ -29,14 +32,8 @@ class ReservationController extends Controller
                 'reserved_at' => 'required|date',
                 'duration' => 'required|integer|min:1'
             ]);
-
-            $conflict = $this->resourceRepository->checkAvailability($request->resource_id, $request->reserved_at, $request->duration);
     
-            if ($conflict) {
-                throw new Exception("Resource is already reserved in this time slot");
-            }
-    
-            $reservation = $this->reservationRepository->create($request->all());
+            $reservation = $this->reservationFactory->create($request->all());
             return ResponseHelper::success($reservation);
         } catch (Exception $e) {
             return ResponseHelper::error($e);
