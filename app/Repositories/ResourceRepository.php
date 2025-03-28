@@ -14,20 +14,21 @@ class ResourceRepository implements ResourceRepositoryInterface
         return Resource::all();
     }
 
+    public function findById($id)
+    {
+        return Resource::find($id);
+    }
+
     public function checkAvailability($id, $reservedAt, $duration)
     {
         $resource = Resource::find($id);
         if (!$resource) {
             return false;
         }
-
-        $startTime = Carbon::parse($reservedAt);
-        $endTime = $startTime->copy()->addMinutes((int) $duration);
-
-        return Reservation::where('resource_id', $id)
-            ->where(function ($query) use ($startTime, $endTime) {
-                $query->whereBetween('reserved_at', [$startTime, $endTime])
-                      ->orWhereBetween('reserved_at', [$startTime, $endTime]);
-        })->exists();
+        
+        return !$resource->reservations()
+        ->where('reserved_at', '<=', $reservedAt)
+        ->whereRaw('DATE_ADD(reserved_at, INTERVAL duration MINUTE) > ?', [$reservedAt])
+        ->exists();
     }
 }
