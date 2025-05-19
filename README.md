@@ -1,79 +1,70 @@
-# Estructura y deseño del sistema
+# Project Title: Laravel Resource Reservation API
 
-El sistema está desarrollado en Laravel version 12.0, siguiendo una arquitectura modular y desacoplada. Se implementaron patrones de diseño que facilitan la escalabilidad, mantenibilidad y reutilización del código.
+## System Structure and Design
 
+This system is developed in Laravel version 12.0, following a modular and decoupled architecture. Design patterns have been implemented to facilitate scalability, maintainability, and code reusability.
 
-## Capas del sistema:
+## System Layers:
 
-- Controladores: Manejan las solicitudes HTTP y responden con JSON en los endpoints de la API REST.
+-   **Controllers**: Handle HTTP requests and respond with JSON at the REST API endpoints.
+-   **Services (Factories and Repositories)**: Encapsulate business logic and data management.
+-   **Models and Eloquent ORM**: Represent system entities and handle database persistence.
+-   **Migrations and Seeders**: Ensure database structure and allow populating it with test data.
+-   **Unit and Integration Tests**: Implemented with PHPUnit to guarantee software quality.
 
-- Servicios (Factories y Repositories): Encapsulan la lógica de negocio y la gestión de datos.
+## Design Decisions
 
-- Modelos y Eloquent ORM: Representan las entidades del sistema y manejan la persistencia en la base de datos.
+### 1. MVC (Model-View-Controller) Pattern
+-   **Why?** Laravel implements the MVC pattern, which allows for structured code organization and separation of business logic from presentation.
+-   **Benefits**:
+    -   Improves code organization and maintainability.
+    -   Allows for better separation of responsibilities.
+    -   Facilitates system scalability.
 
-- Migraciones y Seeders: Aseguran la estructura de la base de datos y permiten poblarla con datos de prueba.
+### 2. Repository Pattern
+-   **Why?** Used to decouple data access logic from controllers, making it easier to change the database without affecting business logic.
+-   **Benefits**:
+    -   Improves organization and maintainability.
+    -   Enables dependency injection and implementation of unit tests.
 
-- Pruebas Unitarias y de Integración: Implementadas con PHPUnit para garantizar la calidad del software.
+### 3. Factory Pattern
+-   **Why?** Used to standardize the creation of reservations without directly depending on the database.
+-   **Benefits**:
+    -   Allows for consistent generation of reservation objects.
+    -   Facilitates the generation of test data in tests.
 
-# Decisiones de diseño
+### 4. RESTful API
+-   **Why?** The API was designed following REST principles to ensure system interoperability and scalability.
+-   **Benefits**:
+    -   Use of standard HTTP verbs (GET, POST, PUT, DELETE).
+    -   Structured responses in JSON.
 
-### 1 - Patrón MVC (Modelo-Vista-Controlador)
-- ¿Por qué? Laravel implementa el patrón MVC, lo que permite organizar el código de manera estructurada y separar la lógica de negocio de la presentación.
+### 5. Application Dockerization
+-   **Why?** Docker was chosen to containerize the application, ensuring consistent and portable environments.
+-   **Benefits**:
+    -   Allows the application to run in any environment without depending on specific operating system configurations.
+    -   Facilitates the configuration of dependencies like MySQL, Nginx, etc., using Docker Compose.
+    -   Improves deployment and scalability across different environments.
+-   **Project Implementation**:
+    -   A `Dockerfile` was created to define the Laravel image.
+    -   `docker-compose.yml` was configured to manage application containers, database, and additional services.
+    -   Persistent volumes were ensured to prevent data loss between restarts.
 
-Beneficios:
-  - Mejora la organización y la mantenibilidad del código.
-  - Permite una mejor separación de responsabilidades.
-  - Facilita la escalabilidad del sistema.
+## Configuration Instructions
 
-### 2 - Patrón Repository:
-- ¿Por qué? Se usó para desacoplar la lógica de acceso a datos de los controladores, facilitando cambios en la base de datos sin afectar la lógica de negocio.
-
-Beneficios:
-  - Mejora la organización y mantenibilidad.
-  - Permite la inyección de dependencias y la implementación de pruebas unitarias. 
-
-### 3 - Patrón Factory
-- ¿Por qué? Se utilizó para estandarizar la creación de reservas sin depender directamente de la base de datos.
-
-Beneficios:
-  - Permite generar objetos de reserva de manera consistente.
-  - Facilita la generación de datos de prueba en los tests.
-
-### 4 - API RESTful
-- ¿Por qué? Se diseñó la API siguiendo principios REST para asegurar la interoperabilidad y escalabilidad del sistema.
-
-Beneficios:
- - Uso de verbos HTTP estándar (GET, POST, PUT, DELETE).
- - Respuestas estructuradas en JSON.
-
-### 5 - Dockerización de la Aplicación
-- ¿Por qué? Se decidió utilizar Docker para contenerizar la aplicación, asegurando que en los diferentes entorno de sean consistentes y portables.
-
-Beneficios:
-- Permite que la aplicación se ejecute en cualquier entorno sin depender de configuraciones específicas del sistema operativo.
-- Facilita la configuración de dependencias como MySQL, Nginx etc... mediante Docker Compose.
-- Mejora el despliegue y la escalabilidad en los diferentes entornos.
-
-Implementación en el proyecto:
-
-- Se creó un Dockerfile para definir la imagen de Laravel.
-- Se configuró docker-compose.yml para gestionar contenedores de la aplicación, base de datos y servicios adicionales.
-- Se aseguraron volúmenes persistentes para evitar la pérdida de datos entre reinicios.
-
-# Instrucciones de configuración
-
-### 1 - Clonar el repositorio
+### 1. Clone the repository
 ```sh
 git clone https://github.com/oscarock/test-coco
 ```
 
-### 2 - Ingresar a la carpeta del proyecto
+### 2. Navigate to the project folder
 ```sh
 cd test-coco
 ```
 
-### 3 - Ingresar a la carpeta `test-coco` y modificar el archivo `.env` en la sección de configuración de la base de datos: 
-```sh
+### 3. Modify the `.env` file
+Navigate into the `test-coco` folder and modify the database configuration section in the `.env` file (you might need to copy `.env.example` to `.env` first if it doesn't exist):
+```ini
 DB_CONNECTION=mysql
 DB_HOST=db
 DB_PORT=3306
@@ -82,36 +73,39 @@ DB_USERNAME=laravel_user
 DB_PASSWORD=secret
 ```
 
-### 4 - Levantar el proyecto con Docker
+### 4. Start the project with Docker
 ```sh
 docker compose up -d
 ```
-Se crearán tres contenedores: app, nginx y base de datos.
+This will create three containers: `app`, `nginx`, and `db` (database).
 
-### 5 - Verificar los contenedores que esten arriba
+### 5. Verify that the containers are running
 ```sh
 docker ps -a
 ```
 
-### 6 - Ingresar al contenedor app y ejecutar las migraciones 
+### 6. Access the `app` container and run migrations
+Replace `ID_CONTAINER` with the actual ID or name of your `app` container (e.g., `test-coco-app-1`).
 ```sh
-docker exec -it ID_CONTENEDOR bash
+docker exec -it ID_CONTAINER bash
 php artisan migrate
 ```
 
-### 7 - Dentro del contenedor ejecutar los seed para crear los resources
+### 7. Inside the container, run the seeders to create resources
+Still inside the `app` container (if you exited, use `docker exec -it ID_CONTAINER bash` again):
 ```sh
-docker exec -it ID_CONTENEDOR bash
 php artisan db:seed --class=ResourceSeeder
 ```
 
-### 8 - Acceder a la aplicación
-Si no se cambiaron los puertos por defecto, las URLs serán:
+### 8. Access the application
+If default ports were not changed, the URLs will be:
 
-- **API:** [localhost:85](http://localhost:85/)
+-   **API**: [http://localhost:85/](http://localhost:85/)
 
-### 9 - Coleccion del API guardar este script en un archivo e importarlo en postman
-```sh
+### 9. Postman API Collection
+Save the following JSON script into a file (e.g., `test-coco.postman_collection.json`) and import it into Postman:
+
+```json
 {
 	"info": {
 		"_postman_id": "c7cee916-76f0-49df-ad31-77fb208b30a6",
@@ -121,7 +115,7 @@ Si no se cambiaron los puertos por defecto, las URLs serán:
 	},
 	"item": [
 		{
-			"name": "listar-recursos",
+			"name": "list-resources",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -149,7 +143,7 @@ Si no se cambiaron los puertos por defecto, las URLs serán:
 			"response": []
 		},
 		{
-			"name": "consultar-disponibilidad",
+			"name": "check-availability",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -189,7 +183,7 @@ Si no se cambiaron los puertos por defecto, las URLs serán:
 			"response": []
 		},
 		{
-			"name": "crear-reserva",
+			"name": "create-reservation",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -226,7 +220,7 @@ Si no se cambiaron los puertos por defecto, las URLs serán:
 			"response": []
 		},
 		{
-			"name": "cancelar-reserva",
+			"name": "cancel-reservation",
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -256,4 +250,3 @@ Si no se cambiaron los puertos por defecto, las URLs serán:
 		}
 	]
 }
-```
